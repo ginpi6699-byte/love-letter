@@ -12,11 +12,11 @@ body{margin:0;font-family:'Cormorant Garamond',serif;background:#3a0008}
 img{image-rendering:auto}
 button{font-family:inherit}
 
-@keyframes particleFall{0%{top:-10%}100%{top:110%}}
+@keyframes particleFall{0%{transform:translateY(-100%)}100%{transform:translateY(105vh)}}
 @keyframes particleSway{0%{transform:translateX(-24px) rotate(0deg)}50%{transform:translateX(24px) rotate(180deg)}100%{transform:translateX(-24px) rotate(360deg)}}
 @keyframes scrollLoop{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 @keyframes bling{0%{transform:scale(.3) rotate(0deg);opacity:0}50%{opacity:.95;transform:scale(1.1) rotate(90deg)}100%{transform:scale(.5) rotate(180deg);opacity:0}}
-@keyframes blingBg{0%{transform:scale(.5) rotate(0deg);opacity:0}50%{opacity:.85;transform:scale(1.3) rotate(45deg);filter:brightness(1.5)}100%{transform:scale(.5) rotate(90deg);opacity:0}}
+@keyframes blingBg{0%{transform:scale(.5) rotate(0deg);opacity:0}50%{opacity:.85;transform:scale(1.3) rotate(45deg)}100%{transform:scale(.5) rotate(90deg);opacity:0}}
 @keyframes zoomCard{0%{transform:scale(.5);opacity:0;filter:blur(5px)}70%{transform:scale(1.04);filter:blur(0)}100%{transform:scale(1);opacity:1}}
 @keyframes sheen{0%{transform:translateX(-120%)}60%,100%{transform:translateX(220%)}}
 @keyframes glowPulse{0%,100%{box-shadow:0 0 40px rgba(234,179,8,.4),0 0 90px rgba(234,179,8,.18)}50%{box-shadow:0 0 60px rgba(234,179,8,.7),0 0 130px rgba(234,179,8,.32)}}
@@ -130,6 +130,14 @@ button{font-family:inherit}
 
 /* particles */
 .rain{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden}
+.drop{position:absolute;top:0;pointer-events:none;transform:translateY(-100%);will-change:transform}
+.drop img{width:100%;height:auto;display:block;pointer-events:none}
+
+/* phones: backdrop blur over animated layers is the most expensive thing on mobile GPUs */
+@media (max-width:768px),(pointer:coarse){
+  .strip{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(92,16,16,.72)}
+  .modal{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(0,0,0,.9)}
+}
 </style>
 </head>
 <body>
@@ -145,7 +153,7 @@ button{font-family:inherit}
     <div class="player">
       <div class="player-top">
       <div class="player-tab"></div>
-      <div class="album"><img src="assets/album-art.jpeg" alt="About You album art"></div>
+      <div class="album"><img src="assets/web/album-art.webp" alt="About You album art"></div>
       <div class="info">
         <div>
           <p class="title">About You</p>
@@ -172,17 +180,17 @@ button{font-family:inherit}
     </div>
 
     <div class="hearts">
-      <button class="heart" id="loveBtn" aria-label="Love burst"><img src="assets/heartgold.png" alt="Heart"></button>
-      <button class="heart" id="loversBtn" aria-label="Tarot card"><img src="assets/heartgold.png" alt="Heart"></button>
-      <img class="cupid" src="assets/cupid-cut.png" alt="">
+      <button class="heart" id="loveBtn" aria-label="Love burst"><img src="assets/web/heartgold.webp" alt="Heart"></button>
+      <button class="heart" id="loversBtn" aria-label="Tarot card"><img src="assets/web/heartgold.webp" alt="Heart"></button>
+      <img class="cupid" src="assets/web/cupid-cut.webp" alt="">
     </div>
     <p class="hint">Anhiu chạm vào tim nhée</p>
 
     <div class="env-wrap">
       <div class="env-click" id="envelope">
-        <img src="assets/envelope-lover-ivory.png" alt="Envelope">
+        <img src="assets/web/envelope-lover-ivory.webp" alt="Envelope" loading="lazy">
         <button class="pill" type="button">
-          <img src="assets/pill-button-ivory.png" alt="">
+          <img src="assets/web/pill-button-ivory.webp" alt="" loading="lazy">
           <span>anh mở thư nhé!</span>
         </button>
       </div>
@@ -209,7 +217,7 @@ button{font-family:inherit}
 <div class="modal" id="modal">
   <div class="modal-sparkles" id="modalSparkles"></div>
   <div class="modal-card" id="modalCard">
-    <div class="card-frame"><img src="assets/thelovers.png" alt="The Lovers"></div>
+    <div class="card-frame"><img src="assets/web/thelovers.webp" alt="The Lovers"></div>
     <button class="back" id="closeBtn">Trở lại ✕</button>
   </div>
 </div>
@@ -222,6 +230,7 @@ button{font-family:inherit}
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var rnd = function (a, b) { return a + Math.random() * (b - a); };
+  var LITE = window.matchMedia('(max-width: 768px), (pointer: coarse)').matches; // phones get fewer animated layers
   var STAR = '<svg viewBox="0 0 24 24" fill="COLOR"><path d="M12 0c.7 6.5 2.9 10.3 12 12-9.1 1.7-11.3 5.5-12 12-.7-6.5-2.9-10.3-12-12C9.1 10.3 11.3 6.5 12 0z"/></svg>';
 
   function sparkle(host, o) {
@@ -234,7 +243,7 @@ button{font-family:inherit}
   }
 
   // background: tiny twinkling silver dots, then gold stars on top
-  for (var j = 0; j < 150; j++) {
+  for (var j = 0; j < (LITE ? 70 : 150); j++) {
     var dot = document.createElement('div'), z = rnd(1, 3.2);
     dot.className = 'silver';
     dot.style.cssText = 'left:' + rnd(0, 100).toFixed(1) + '%;top:' + rnd(0, 100).toFixed(1) + '%;width:' + z.toFixed(1) + 'px;height:' + z.toFixed(1) +
@@ -244,12 +253,12 @@ button{font-family:inherit}
   }
 
   // background sparkles
-  for (var i = 0; i < 40; i++) {
+  for (var i = 0; i < (LITE ? 22 : 40); i++) {
     sparkle($('bgSparkles'), { size: Math.round(rnd(6, 18)), glow: 8, shadow: 'rgba(253,224,71,.9)', color: '#fde047', anim: 'blingBg', dur: rnd(3, 7), delay: rnd(0, 5) });
   }
 
   // photo strip (5 photos duplicated for seamless loop)
-  var photos = [1, 2, 3, 4, 5].map(function (n) { return 'assets/gallery-' + n + '-sharp.png'; });
+  var photos = [1, 2, 3, 4, 5].map(function (n) { return 'assets/web/gallery-' + n + '-sharp.webp'; });
   photos.concat(photos).forEach(function (src) {
     var im = document.createElement('img');
     im.src = src; im.alt = 'Kỷ niệm';
@@ -333,18 +342,22 @@ button{font-family:inherit}
     track.appendChild(p);
     return p;
   });
+  function centerLyric() {
+    var el = lines[current];
+    if (el) track.style.transform = 'translateY(' + (box.clientHeight / 2 - el.offsetTop - el.offsetHeight / 2) + 'px)';
+  }
   function syncLyrics() {
     var t = song.currentTime, i = 0;
     while (i + 1 < LYRICS.length && LYRICS[i + 1][0] <= t) i++;
-    if (i !== current) {
-      if (current >= 0) lines[current].classList.remove('active');
-      lines[i].classList.add('active');
-      current = i;
-    }
-    var el = lines[i]; // re-center every tick so wrapping/resizes stay aligned
-    track.style.transform = 'translateY(' + (box.clientHeight / 2 - el.offsetTop - el.offsetHeight / 2) + 'px)';
+    if (i === current) return;
+    if (current >= 0) lines[current].classList.remove('active');
+    lines[i].classList.add('active');
+    current = i;
+    centerLyric();
   }
   (function loop() { syncLyrics(); requestAnimationFrame(loop); })();
+  window.addEventListener('resize', centerLyric);
+  if (document.fonts) document.fonts.ready.then(centerLyric); // line heights change once the web font arrives
 
   // letter
   var letter = $('letter'), opened = false;
@@ -359,7 +372,7 @@ button{font-family:inherit}
 
   // love burst
   var PARTICLES = ['particle-1-deepred', 'particle-1-gold', 'particle-2-deepred', 'particle-2-gold', 'particle-3-deepred', 'particle-3-gold',
-    'particle-4-deepred', 'particle-4-gold', 'glass-heart-deepred', 'glass-heart-gold'].map(function (n) { return 'assets/' + n + '.png'; });
+    'particle-4-deepred', 'particle-4-gold', 'glass-heart-deepred', 'glass-heart-gold'].map(function (n) { return 'assets/web/' + n + '.webp'; });
   var rainTimer, textTimer;
 
   function loveBurst() {
@@ -368,30 +381,40 @@ button{font-family:inherit}
     var rain = $('rain');
     rain.innerHTML = '';
     var longest = 0;
-    for (var i = 0; i < 120; i++) {
-      var dur = rnd(1.8, 3.2), delay = rnd(0, 2.4), size = Math.round(rnd(80, 160));
+    var frag = document.createDocumentFragment();
+    for (var i = 0, n = LITE ? 55 : 120; i < n; i++) {
+      var dur = rnd(1.8, 3.2), delay = rnd(0, 2.4), size = Math.round(LITE ? rnd(64, 120) : rnd(80, 160));
       longest = Math.max(longest, dur + delay);
       var d = document.createElement('div');
-      d.style.cssText = 'position:absolute;top:-10%;left:' + rnd(0, 100).toFixed(1) + 'vw;width:' + size + 'px;pointer-events:none;animation:particleFall ' + dur.toFixed(1) + 's linear ' + delay.toFixed(1) + 's forwards';
+      d.className = 'drop';
+      d.style.cssText = 'left:' + rnd(-5, 95).toFixed(1) + 'vw;width:' + size + 'px;animation:particleFall ' + dur.toFixed(1) + 's linear ' + delay.toFixed(1) + 's forwards';
       var im = document.createElement('img');
       im.src = PARTICLES[Math.floor(Math.random() * PARTICLES.length)];
       im.alt = '';
-      im.style.cssText = 'width:100%;height:auto;display:block;pointer-events:none;filter:drop-shadow(0 6px 10px rgba(120,10,25,.3));animation:particleSway ' + rnd(2.5, 5).toFixed(1) + 's ease-in-out infinite';
+      im.style.animation = 'particleSway ' + rnd(2.5, 5).toFixed(1) + 's ease-in-out infinite';
+      if (!LITE) im.style.filter = 'drop-shadow(0 6px 10px rgba(120,10,25,.3))';
       d.appendChild(im);
-      rain.appendChild(d);
+      frag.appendChild(d);
     }
+    rain.appendChild(frag);
     var total = longest + 0.2;
     rainTimer = setTimeout(function () { rain.innerHTML = ''; }, total * 1000 + 800);
     textTimer = setTimeout(function () { $('loveText').classList.add('show'); }, total * 1000);
   }
   $('loveBtn').addEventListener('click', loveBurst);
+  window.addEventListener('load', function () {
+    PARTICLES.concat('assets/web/thelovers.webp').forEach(function (src) {
+      var im = new Image(); im.src = src;
+      if (im.decode) im.decode().catch(function () {});
+    });
+  });
   $('loveText').querySelector('h1').addEventListener('animationend', function () { $('loveText').classList.remove('show'); });
 
   // tarot modal
   function openLovers() {
     var host = $('modalSparkles');
     host.innerHTML = '';
-    for (var i = 0; i < 30; i++) {
+    for (var i = 0; i < (LITE ? 16 : 30); i++) {
       sparkle(host, { size: Math.round(rnd(8, 26)), glow: 6, shadow: 'rgba(242,201,76,.9)', color: '#f2c94c', anim: 'bling', dur: rnd(2, 5), delay: rnd(0, 4) });
     }
     $('modal').classList.add('show');
